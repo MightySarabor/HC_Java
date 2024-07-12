@@ -80,7 +80,7 @@ public class AppParam extends JFrame {
             data[i] = sample;
         }
 
-        int totalIterations = (n - blockSize + 1) / shift;
+        int totalIterations = (n - blockSize) / shift + 1;
 
         for (int i = 0; i <= n - blockSize; i += shift) {
             double[] block = new double[blockSize];
@@ -92,7 +92,7 @@ public class AppParam extends JFrame {
             long current = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
             memoryUsage.add(current);
 
-            double progress = (i / (double) totalIterations) * 100;
+            double progress = ((i / (double) shift) / (totalIterations - 1)) * 100;
             System.out.printf("Progress: %.2f%%\n", progress);
         }
 
