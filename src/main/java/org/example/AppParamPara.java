@@ -13,11 +13,15 @@ import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveTask;
+
 import org.jtransforms.fft.DoubleFFT_1D;
 
-public class AppParam extends JFrame {
+public class AppParamPara extends JFrame {
 
-    public AppParam(String title, List<Long> memoryUsage, double samplingRate, int blockSize, int shift) {
+    public AppParamPara(String title, List<Long> memoryUsage, double samplingRate, int blockSize, int shift) {
         super(title);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -44,7 +48,7 @@ public class AppParam extends JFrame {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 4) {
-            System.err.println("Usage: java AppParam <filePath> <blockSize> <shift> <threshold>");
+            System.err.println("Usage: java AppParamPara <filePath> <blockSize> <shift> <threshold>");
             System.exit(1);
         }
 
@@ -56,7 +60,7 @@ public class AppParam extends JFrame {
 
         List<Long> memoryUsage = blockFourierAnalysis(filePath, blockSize, shift, duration, threshold);
         double samplingRate = getSamplingRate(filePath);
-        SwingUtilities.invokeLater(() -> new AppParam("Memory Usage Plot", memoryUsage, samplingRate, blockSize, shift));
+        SwingUtilities.invokeLater(() -> new AppParamPara("Memory Usage Plot", memoryUsage, samplingRate, blockSize, shift));
     }
 
     private static List<Long> blockFourierAnalysis(String filePath, int blockSize, int shift, int duration, double threshold) throws Exception {
@@ -85,16 +89,18 @@ public class AppParam extends JFrame {
         double[] amplitudeSum = new double[blockSize / 2];
         int blockCount = 0;
 
+        ForkJoinPool pool = new ForkJoinPool();
+
         for (int i = 0; i <= n - blockSize; i += shift) {
             double[] block = new double[blockSize];
             System.arraycopy(data, i, block, 0, blockSize);
 
-            DoubleFFT_1D fft = new DoubleFFT_1D(blockSize);
-            fft.realForward(block);
+            FFTTask task = new FFTTask(block);
+            double[] result = pool.invoke(task);
 
             for (int j = 0; j < blockSize / 2; j++) {
-                double real = block[2 * j];
-                double imag = block[2 * j + 1];
+                double real = result[2 * j];
+                double imag = result[2 * j + 1];
                 double amplitude = Math.sqrt(real * real + imag * imag);
                 amplitudeSum[j] += amplitude;
             }
@@ -106,6 +112,8 @@ public class AppParam extends JFrame {
             double progress = ((i / (double) shift) / (totalIterations - 1)) * 100;
             System.out.printf("Progress: %.2f%%\n", progress);
         }
+
+        pool.shutdown();
 
         System.out.println("Frequency Amplitudes above Threshold:");
         double samplingRate = getSamplingRate(filePath);
@@ -125,5 +133,20 @@ public class AppParam extends JFrame {
         AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
         AudioFormat format = audioInputStream.getFormat();
         return format.getSampleRate();
+    }
+}
+
+class FFTTask extends RecursiveTask<double[]> {
+    private final double[] block;
+
+    public FFTTask(double[] block) {
+        this.block = block;
+    }
+
+    @Override
+    protected double[] compute() {
+        DoubleFFT_1D fft = new DoubleFFT_1D(block.length);
+        fft.realForward(block);
+        return block;
     }
 }
