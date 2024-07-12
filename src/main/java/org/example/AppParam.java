@@ -15,9 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jtransforms.fft.DoubleFFT_1D;
 
-public class App extends JFrame {
+public class AppParam extends JFrame {
 
-    public App(String title, List<Long> memoryUsage, double samplingRate, int blockSize, int shift) {
+    public AppParam(String title, List<Long> memoryUsage, double samplingRate, int blockSize, int shift) {
         super(title);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -43,14 +43,19 @@ public class App extends JFrame {
     }
 
     public static void main(String[] args) throws Exception {
-        String filePath = "src/main/java/org/example/audio.wav";
-        int blockSize = 512;
-        int shift = 1;
+        if (args.length < 3) {
+            System.err.println("Usage: java AppParam <filePath> <blockSize> <shift>");
+            System.exit(1);
+        }
+
+        String filePath = args[0];
+        int blockSize = Integer.parseInt(args[1]);
+        int shift = Integer.parseInt(args[2]);
         int duration = 60;
 
         List<Long> memoryUsage = blockFourierAnalysis(filePath, blockSize, shift, duration);
         double samplingRate = getSamplingRate(filePath);
-        SwingUtilities.invokeLater(() -> new App("Memory Usage Plot", memoryUsage, samplingRate, blockSize, shift));
+        SwingUtilities.invokeLater(() -> new AppParam("Memory Usage Plot", memoryUsage, samplingRate, blockSize, shift));
     }
 
     private static List<Long> blockFourierAnalysis(String filePath, int blockSize, int shift, int duration) throws Exception {
