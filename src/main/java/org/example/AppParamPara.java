@@ -13,10 +13,8 @@ import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveTask;
-
+import java.util.stream.IntStream;
 import org.jtransforms.fft.DoubleFFT_1D;
 
 public class AppParamPara extends JFrame {
@@ -48,7 +46,7 @@ public class AppParamPara extends JFrame {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 4) {
-            System.err.println("Usage: java AppParamPara <filePath> <blockSize> <shift> <threshold>");
+            System.err.println("Usage: java AppParam <filePath> <blockSize> <shift> <threshold>");
             System.exit(1);
         }
 
@@ -87,38 +85,48 @@ public class AppParamPara extends JFrame {
 
         int totalIterations = (n - blockSize) / shift + 1;
         double[] amplitudeSum = new double[blockSize / 2];
-        int blockCount = 0;
 
-        ForkJoinPool pool = new ForkJoinPool();
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        System.out.printf("Available processors: %d\n", availableProcessors);
 
-        for (int i = 0; i <= n - blockSize; i += shift) {
-            double[] block = new double[blockSize];
-            System.arraycopy(data, i, block, 0, blockSize);
+        ForkJoinPool forkJoinPool = new ForkJoinPool(availableProcessors);
 
-            FFTTask task = new FFTTask(block);
-            double[] result = pool.invoke(task);
+        forkJoinPool.submit(() -> {
+            IntStream.range(0, totalIterations).parallel().forEach(i -> {
+                int start = i * shift;
+                if (start + blockSize <= data.length) {
+                    double[] block = new double[blockSize];
+                    System.arraycopy(data, start, block, 0, blockSize);
 
-            for (int j = 0; j < blockSize / 2; j++) {
-                double real = result[2 * j];
-                double imag = result[2 * j + 1];
-                double amplitude = Math.sqrt(real * real + imag * imag);
-                amplitudeSum[j] += amplitude;
-            }
-            blockCount++;
+                    DoubleFFT_1D fft = new DoubleFFT_1D(blockSize);
+                    fft.realForward(block);
 
-            long current = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-            memoryUsage.add(current);
+                    double[] localAmplitudeSum = new double[blockSize / 2];
+                    for (int j = 0; j < blockSize / 2; j++) {
+                        double real = block[2 * j];
+                        double imag = block[2 * j + 1];
+                        double amplitude = Math.sqrt(real * real + imag * imag);
+                        localAmplitudeSum[j] = amplitude;
+                    }
 
-            double progress = ((i / (double) shift) / (totalIterations - 1)) * 100;
-            System.out.printf("Progress: %.2f%%\n", progress);
-        }
+                    synchronized (amplitudeSum) {
+                        for (int j = 0; j < blockSize / 2; j++) {
+                            amplitudeSum[j] += localAmplitudeSum[j];
+                        }
+                    }
 
-        pool.shutdown();
+                    long current = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+                    synchronized (memoryUsage) {
+                        memoryUsage.add(current);
+                    }
+                }
+            });
+        }).get();
 
         System.out.println("Frequency Amplitudes above Threshold:");
         double samplingRate = getSamplingRate(filePath);
         for (int j = 0; j < blockSize / 2; j++) {
-            double averageAmplitude = amplitudeSum[j] / blockCount;
+            double averageAmplitude = amplitudeSum[j] / totalIterations;
             if (averageAmplitude > threshold) {
                 double frequency = j * samplingRate / blockSize;
                 System.out.printf("Frequency: %.2f Hz, Average Amplitude: %.2f\n", frequency, averageAmplitude);
@@ -133,20 +141,5 @@ public class AppParamPara extends JFrame {
         AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
         AudioFormat format = audioInputStream.getFormat();
         return format.getSampleRate();
-    }
-}
-
-class FFTTask extends RecursiveTask<double[]> {
-    private final double[] block;
-
-    public FFTTask(double[] block) {
-        this.block = block;
-    }
-
-    @Override
-    protected double[] compute() {
-        DoubleFFT_1D fft = new DoubleFFT_1D(block.length);
-        fft.realForward(block);
-        return block;
     }
 }
