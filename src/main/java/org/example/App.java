@@ -11,10 +11,10 @@ import org.jtransforms.fft.DoubleFFT_1D;
 public class App {
 
     public static void main(String[] args) throws Exception {
-        String filePath = "src/main/java/org/example/constant_frequency.wav";
+        String filePath = "src/main/java/org/example/audio.wav";
         int blockSize = 512;
         int shift = 1;
-        int duration = 20;
+        int duration = 5;
         double threshold = 1000000.0; // Example threshold, adjust as needed
 
         long startTime = System.currentTimeMillis();
