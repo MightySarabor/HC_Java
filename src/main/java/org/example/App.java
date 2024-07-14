@@ -1,62 +1,36 @@
 package org.example;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import org.jtransforms.fft.DoubleFFT_1D;
 
-public class App extends JFrame {
-
-    public App(String title, List<Long> memoryUsage, double samplingRate, int blockSize, int shift) {
-        super(title);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-        XYSeries series = new XYSeries("Current Usage");
-        for (int i = 0; i < memoryUsage.size(); i++) {
-            series.add(i * blockSize / samplingRate, memoryUsage.get(i) / (1024 * 1024.0));
-        }
-
-        XYSeriesCollection dataset = new XYSeriesCollection(series);
-        JFreeChart chart = ChartFactory.createXYLineChart(
-                "Memory Usage Over Time",
-                "Time (seconds)",
-                "Current Usage (MB)",
-                dataset
-        );
-
-        ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new Dimension(800, 600));
-        setContentPane(chartPanel);
-        pack();
-        setLocationRelativeTo(null);
-        setVisible(true);
-    }
+public class App {
 
     public static void main(String[] args) throws Exception {
-        String filePath = "src/main/java/org/example/audio.wav";
+        String filePath = "src/main/java/org/example/constant_frequency.wav";
         int blockSize = 512;
         int shift = 1;
-        int duration = 60;
+        int duration = 20;
+        double threshold = 1000000.0; // Example threshold, adjust as needed
 
-        List<Long> memoryUsage = blockFourierAnalysis(filePath, blockSize, shift, duration);
-        double samplingRate = getSamplingRate(filePath);
-        SwingUtilities.invokeLater(() -> new App("Memory Usage Plot", memoryUsage, samplingRate, blockSize, shift));
+        long startTime = System.currentTimeMillis();
+
+        List<double[]> frequencyAmplitudePairs = blockFourierAnalysis(filePath, blockSize, shift, duration, threshold);
+        for (double[] pair : frequencyAmplitudePairs) {
+            System.out.printf("%.2f Hz - %.2f\n", pair[0], pair[1]);
+        }
+
+        long endTime = System.currentTimeMillis();
+        long elapsedTime = endTime - startTime;
+        System.out.printf("Analysis completed in %.2f seconds.\n", elapsedTime / 1000.0);
     }
 
-    private static List<Long> blockFourierAnalysis(String filePath, int blockSize, int shift, int duration) throws Exception {
-        List<Long> memoryUsage = new ArrayList<>();
-
-        long startTime = System.nanoTime();
+    private static List<double[]> blockFourierAnalysis(String filePath, int blockSize, int shift, int duration, double threshold) throws Exception {
+        List<double[]> frequencyAmplitudePairs = new ArrayList<>();
 
         File file = new File(filePath);
         AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
@@ -76,6 +50,7 @@ public class App extends JFrame {
         }
 
         int totalIterations = (n - blockSize + 1) / shift;
+        double[] amplitudeSum = new double[blockSize / 2];
 
         for (int i = 0; i <= n - blockSize; i += shift) {
             double[] block = new double[blockSize];
@@ -84,14 +59,29 @@ public class App extends JFrame {
             DoubleFFT_1D fft = new DoubleFFT_1D(blockSize);
             fft.realForward(block);
 
-            long current = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-            memoryUsage.add(current);
+            double[] localAmplitudeSum = new double[blockSize / 2];
+            for (int j = 0; j < blockSize / 2; j++) {
+                double real = block[2 * j];
+                double imag = block[2 * j + 1];
+                double amplitude = Math.sqrt(real * real + imag * imag);
+                localAmplitudeSum[j] = amplitude;
+            }
 
-            double progress = (i / (double) totalIterations) * 100;
-            System.out.printf("Progress: %.2f%%\n", progress);
+            for (int j = 0; j < blockSize / 2; j++) {
+                amplitudeSum[j] += localAmplitudeSum[j];
+            }
         }
 
-        return memoryUsage;
+        double samplingRate = getSamplingRate(filePath);
+        for (int j = 0; j < blockSize / 2; j++) {
+            double frequency = j * samplingRate / blockSize;
+            double averageAmplitude = amplitudeSum[j] / totalIterations;
+            if (averageAmplitude > threshold) {
+                frequencyAmplitudePairs.add(new double[]{frequency, averageAmplitude});
+            }
+        }
+
+        return frequencyAmplitudePairs;
     }
 
     private static double getSamplingRate(String filePath) throws Exception {
