@@ -1,52 +1,18 @@
 package org.example;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.IntStream;
 import org.jtransforms.fft.DoubleFFT_1D;
 
-public class AppParamPara extends JFrame {
-
-    public AppParamPara(String title, List<Long> memoryUsage, double samplingRate, int blockSize, int shift) {
-        super(title);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-        XYSeries series = new XYSeries("Current Usage");
-        for (int i = 0; i < memoryUsage.size(); i++) {
-            series.add(i * blockSize / samplingRate, memoryUsage.get(i) / (1024 * 1024.0));
-        }
-
-        XYSeriesCollection dataset = new XYSeriesCollection(series);
-        JFreeChart chart = ChartFactory.createXYLineChart(
-                "Memory Usage Over Time",
-                "Time (seconds)",
-                "Current Usage (MB)",
-                dataset
-        );
-
-        ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new Dimension(800, 600));
-        setContentPane(chartPanel);
-        pack();
-        setLocationRelativeTo(null);
-        setVisible(true);
-    }
+public class AppParamPara {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 4) {
-            System.err.println("Usage: java AppParam <filePath> <blockSize> <shift> <threshold>");
+            System.err.println("Usage: java AppParamPara <filePath> <blockSize> <shift> <threshold>");
             System.exit(1);
         }
 
@@ -56,15 +22,20 @@ public class AppParamPara extends JFrame {
         double threshold = Double.parseDouble(args[3]);
         int duration = 60;
 
-        List<Long> memoryUsage = blockFourierAnalysis(filePath, blockSize, shift, duration, threshold);
-        double samplingRate = getSamplingRate(filePath);
-        SwingUtilities.invokeLater(() -> new AppParamPara("Memory Usage Plot", memoryUsage, samplingRate, blockSize, shift));
+        double[] frequencies = new double[blockSize / 2];
+        double[] amplitudes = blockFourierAnalysis(filePath, blockSize, shift, duration, threshold, frequencies);
+
+        // Ausgabe der Frequenz-Amplituden-Paare
+        System.out.println("Frequency (Hz) - Average Amplitude");
+        for (int i = 0; i < frequencies.length; i++) {
+            if (amplitudes[i] > threshold) {
+                System.out.printf("%.2f Hz - %.2f\n", frequencies[i], amplitudes[i]);
+            }
+        }
     }
 
-    private static List<Long> blockFourierAnalysis(String filePath, int blockSize, int shift, int duration, double threshold) throws Exception {
-        List<Long> memoryUsage = new ArrayList<>();
-
-        long startTime = System.nanoTime();
+    private static double[] blockFourierAnalysis(String filePath, int blockSize, int shift, int duration, double threshold, double[] frequencies) throws Exception {
+        double[] amplitudes = new double[blockSize / 2];
 
         File file = new File(filePath);
         AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
@@ -98,6 +69,11 @@ public class AppParamPara extends JFrame {
                     double[] block = new double[blockSize];
                     System.arraycopy(data, start, block, 0, blockSize);
 
+                    // Apply a Hann window
+                    for (int j = 0; j < block.length; j++) {
+                        block[j] *= 0.5 * (1 - Math.cos(2 * Math.PI * j / (block.length - 1)));
+                    }
+
                     DoubleFFT_1D fft = new DoubleFFT_1D(blockSize);
                     fft.realForward(block);
 
@@ -114,26 +90,17 @@ public class AppParamPara extends JFrame {
                             amplitudeSum[j] += localAmplitudeSum[j];
                         }
                     }
-
-                    long current = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-                    synchronized (memoryUsage) {
-                        memoryUsage.add(current);
-                    }
                 }
             });
         }).get();
 
-        System.out.println("Frequency Amplitudes above Threshold:");
         double samplingRate = getSamplingRate(filePath);
         for (int j = 0; j < blockSize / 2; j++) {
-            double averageAmplitude = amplitudeSum[j] / totalIterations;
-            if (averageAmplitude > threshold) {
-                double frequency = j * samplingRate / blockSize;
-                System.out.printf("Frequency: %.2f Hz, Average Amplitude: %.2f\n", frequency, averageAmplitude);
-            }
+            frequencies[j] = j * samplingRate / blockSize;
+            amplitudes[j] = amplitudeSum[j] / totalIterations;
         }
 
-        return memoryUsage;
+        return amplitudes;
     }
 
     private static double getSamplingRate(String filePath) throws Exception {
