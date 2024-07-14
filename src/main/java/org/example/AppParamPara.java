@@ -22,8 +22,13 @@ public class AppParamPara {
         double threshold = Double.parseDouble(args[3]);
         int duration = 60;
 
+        long startTime = System.currentTimeMillis();
+
         double[] frequencies = new double[blockSize / 2];
         double[] amplitudes = blockFourierAnalysis(filePath, blockSize, shift, duration, threshold, frequencies);
+
+        long endTime = System.currentTimeMillis();
+        long elapsedTime = endTime - startTime;
 
         // Ausgabe der Frequenz-Amplituden-Paare
         System.out.println("Frequency (Hz) - Average Amplitude");
@@ -32,6 +37,8 @@ public class AppParamPara {
                 System.out.printf("%.2f Hz - %.2f\n", frequencies[i], amplitudes[i]);
             }
         }
+
+        System.out.printf("Analysis completed in %.2f seconds.\n", elapsedTime / 1000.0);
     }
 
     private static double[] blockFourierAnalysis(String filePath, int blockSize, int shift, int duration, double threshold, double[] frequencies) throws Exception {
