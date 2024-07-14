@@ -20,7 +20,14 @@ public class AppParamPara {
         int blockSize = Integer.parseInt(args[1]);
         int shift = Integer.parseInt(args[2]);
         double threshold = Double.parseDouble(args[3]);
-        int duration = 60;
+        int duration = 5;
+
+        System.out.println("Parameters:");
+        System.out.println("File Path: " + filePath);
+        System.out.println("Block Size: " + blockSize);
+        System.out.println("Shift: " + shift);
+        System.out.println("Duration: " + duration + " seconds");
+        System.out.println("Threshold: " + threshold);
 
         long startTime = System.currentTimeMillis();
 
@@ -30,7 +37,6 @@ public class AppParamPara {
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
 
-        // Ausgabe der Frequenz-Amplituden-Paare
         System.out.println("Frequency (Hz) - Average Amplitude");
         for (int i = 0; i < frequencies.length; i++) {
             if (amplitudes[i] > threshold) {
@@ -75,11 +81,6 @@ public class AppParamPara {
                 if (start + blockSize <= data.length) {
                     double[] block = new double[blockSize];
                     System.arraycopy(data, start, block, 0, blockSize);
-
-                    // Apply a Hann window
-                    for (int j = 0; j < block.length; j++) {
-                        block[j] *= 0.5 * (1 - Math.cos(2 * Math.PI * j / (block.length - 1)));
-                    }
 
                     DoubleFFT_1D fft = new DoubleFFT_1D(blockSize);
                     fft.realForward(block);
