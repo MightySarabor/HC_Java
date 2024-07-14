@@ -1,0 +1,340 @@
+Audio.wav
+
+FFT Seq:
+
+Experiment 1
+blockSize: 512
+shift: 1
+duration: 120 sek
+Schwellwert: 1000000
+wav: audio.wav
+
+0,00 Hz - 16774198,09
+86,13 Hz - 2819688,76
+172,27 Hz - 1854427,89
+258,40 Hz - 1745804,29
+344,53 Hz - 1231196,81
+Analysis completed in 38,68 seconds.
+
+
+FFT Seq:
+
+Experiment 2
+blockSize: 512
+shift: 1
+duration: 60 sek
+Schwellwert: 1000000
+wav: audio.wav
+
+0,00 Hz - 16774199,43
+86,13 Hz - 2819401,34
+172,27 Hz - 1854326,82
+258,40 Hz - 1745809,90
+344,53 Hz - 1231171,83
+Analysis completed in 19,12 seconds.
+
+
+FFT Seq:
+
+Experiment 3
+blockSize: 512
+shift: 1
+duration: 20 sek
+Schwellwert: 1000000
+wav: audio.wav
+
+0,00 Hz - 16774204,81
+86,13 Hz - 2818251,09
+172,27 Hz - 1853922,34
+258,40 Hz - 1745832,32
+344,53 Hz - 1231071,88
+Analysis completed in 6,38 seconds.
+
+FFT Seq:
+
+Experiment 4
+blockSize: 512
+shift: 1
+duration: 5 sek
+Schwellwert: 1000000
+wav: audio.wav
+
+0,00 Hz - 16774229,06
+86,13 Hz - 2813063,97
+172,27 Hz - 1852098,29
+258,40 Hz - 1745933,42
+344,53 Hz - 1230621,12
+Analysis completed in 1,70 seconds.
+
+FFT Par:
+
+Experiment 1
+blockSize: 512
+shift: 1
+duration: 120 sek
+Schwellwert: 1000000
+wav: audio.wav
+
+0,00 Hz - 16774198,09
+86,13 Hz - 2819688,76
+172,27 Hz - 1854427,89
+258,40 Hz - 1745804,29
+344,53 Hz - 1231196,81
+Analysis completed in 6,40 seconds
+
+FFT Par:
+
+Experiment 2
+blockSize: 512
+shift: 1
+duration: 60 sek
+Schwellwert: 1000000
+wav: audio.wav
+
+0,00 Hz - 16774199,43
+86,13 Hz - 2819401,34
+172,27 Hz - 1854326,82
+258,40 Hz - 1745809,90
+344,53 Hz - 1231171,83
+Analysis completed in 3,19 second
+
+FFT Par:
+
+Experiment 3
+blockSize: 512
+shift: 1
+duration: 20 sek
+Schwellwert: 1000000
+wav: audio.wav
+
+0,00 Hz - 16774204,81
+86,13 Hz - 2818251,09
+172,27 Hz - 1853922,34
+258,40 Hz - 1745832,32
+344,53 Hz - 1231071,88
+Analysis completed in 1,45 second
+
+FFT Par:
+
+Experiment 4
+blockSize: 512
+shift: 1
+duration: 5 sek
+Schwellwert: 1000000
+wav: audio.wav
+
+0,00 Hz - 16774229,06
+86,13 Hz - 2813063,97
+172,27 Hz - 1852098,29
+258,40 Hz - 1745933,42
+344,53 Hz - 1230621,12
+Analysis completed in 0,53 seconds
+
+
+Constant_frequency.wav
+
+FFT Seq:
+
+Experiment 1
+blockSize: 512
+shift: 1
+duration: 300 sek
+Schwellwert: 1000000
+wav: constant_frequency.wav
+
+0,00 Hz - 16740269,78
+3617,58 Hz - 1107737,00
+7665,82 Hz - 1160451,87
+11800,20 Hz - 2136589,62
+15848,44 Hz - 1803444,67
+15934,57 Hz - 2689173,56
+19982,81 Hz - 2145824,87
+Analysis completed in 128,68 seconds
+
+FFT Seq:
+
+Experiment 2
+blockSize: 512
+shift: 1
+duration: 200 sek
+Schwellwert: 1000000
+wav: constant_frequency.wav
+
+0,00 Hz - 16740269,85
+3617,58 Hz - 1107737,10
+7665,82 Hz - 1160451,71
+11800,20 Hz - 2136589,62
+15848,44 Hz - 1803444,44
+15934,57 Hz - 2689173,72
+19982,81 Hz - 2145824,78
+Analysis completed in 71,55 seconds
+
+FFT Seq:
+
+Experiment 3
+blockSize: 512
+shift: 1
+duration: 100 sek
+Schwellwert: 1000000
+wav: constant_frequency.wav
+
+0,00 Hz - 16740270,07
+3617,58 Hz - 1107737,39
+7665,82 Hz - 1160451,22
+11800,20 Hz - 2136589,64
+15848,44 Hz - 1803443,74
+15934,57 Hz - 2689174,21
+19982,81 Hz - 2145824,53
+Analysis completed in 32,85 seconds
+
+FFT Seq:
+
+Experiment 4
+blockSize: 512
+shift: 1
+duration: 50 sek
+Schwellwert: 1000000
+wav: constant_frequency.wav
+
+0,00 Hz - 16740270,50
+3617,58 Hz - 1107737,98
+7665,82 Hz - 1160450,24
+11800,20 Hz - 2136589,68
+15848,44 Hz - 1803442,35
+15934,57 Hz - 2689175,18
+19982,81 Hz - 2145824,01
+Analysis completed in 16,77 seconds
+
+FFT Seq:
+
+Experiment 5
+blockSize: 512
+shift: 1
+duration: 5 sek
+Schwellwert: 1000000
+wav: constant_frequency.wav
+
+0,00 Hz - 16740278,24
+3617,58 Hz - 1107748,60
+7665,82 Hz - 1160432,54
+11800,20 Hz - 2136590,32
+15848,44 Hz - 1803417,26
+15934,57 Hz - 2689192,82
+19982,81 Hz - 2145814,71
+Analysis completed in 1,88 seconds
+
+FFT Par:
+
+Experiment 1
+blockSize: 512
+shift: 1
+duration: 300 sek
+Schwellwert: 1000000
+wav: constant_frequency.wav
+
+0,00 Hz - 16776793,54
+1981,05 Hz - 1463774,36
+2067,19 Hz - 1455553,68
+6029,30 Hz - 2285881,81
+6115,43 Hz - 2247616,59
+10077,54 Hz - 1379527,22
+10163,67 Hz - 1341212,13
+Analysis completed in 30,16 second
+
+FFT Par:
+
+Experiment 1
+blockSize: 512
+shift: 1
+duration: 300 sek
+Schwellwert: 1000000
+wav: constant_frequency.wav
+
+0,00 Hz - 16740269,78
+3617,58 Hz - 1107737,00
+7665,82 Hz - 1160451,87
+11800,20 Hz - 2136589,62
+15848,44 Hz - 1803444,67
+15934,57 Hz - 2689173,56
+19982,81 Hz - 2145824,87
+Analysis completed in 27,72 seconds
+
+FFT Par:
+
+Experiment 2
+blockSize: 512
+shift: 1
+duration: 200 sek
+Schwellwert: 1000000
+wav: constant_frequency.wav
+
+0,00 Hz - 16740269,85
+3617,58 Hz - 1107737,10
+7665,82 Hz - 1160451,71
+11800,20 Hz - 2136589,62
+15848,44 Hz - 1803444,44
+15934,57 Hz - 2689173,72
+19982,81 Hz - 2145824,78
+Analysis completed in 19,35 seconds
+
+FFT Par:
+
+Experiment 3
+blockSize: 512
+shift: 1
+duration: 100 sek
+Schwellwert: 1000000
+wav: constant_frequency.wav
+
+0,00 Hz - 16740270,07
+3617,58 Hz - 1107737,39
+7665,82 Hz - 1160451,22
+11800,20 Hz - 2136589,64
+15848,44 Hz - 1803443,74
+15934,57 Hz - 2689174,21
+19982,81 Hz - 2145824,53
+Analysis completed in 8,11 seconds
+
+
+FFT Par:
+
+Experiment 4
+blockSize: 512
+shift: 1
+duration: 50 sek
+Schwellwert: 1000000
+wav: constant_frequency.wav
+
+0,00 Hz - 16740270,50
+3617,58 Hz - 1107737,98
+7665,82 Hz - 1160450,24
+11800,20 Hz - 2136589,68
+15848,44 Hz - 1803442,35
+15934,57 Hz - 2689175,18
+19982,81 Hz - 2145824,01
+Analysis completed in 3,11 second
+
+FFT Par:
+
+Experiment 4
+blockSize: 512
+shift: 1
+duration: 5 sek
+Schwellwert: 1000000
+wav: constant_frequency.wav
+
+0,00 Hz - 16740278,24
+3617,58 Hz - 1107748,60
+7665,82 Hz - 1160432,54
+11800,20 Hz - 2136590,32
+15848,44 Hz - 1803417,26
+15934,57 Hz - 2689192,82
+19982,81 Hz - 2145814,71
+Analysis completed in 0,57 seconds
+
+
+
+
+
+
+
